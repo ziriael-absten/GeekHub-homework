@@ -1,0 +1,6 @@
+color_list_1 = input("Enter some colors: ")
+color_list_2 = input("Enter some colors again please: ")
+color_list_1 = color_list_1.split(",")
+color_list_2 = color_list_2.split(",")
+result = list(set(color_list_1) - set(color_list_2))
+# print(result)

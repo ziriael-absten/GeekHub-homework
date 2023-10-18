@@ -1,0 +1,5 @@
+nums = input("Enter some numbers: ")
+nums_lst = list(nums.split(","))
+nums_tuple = tuple(nums.split(","))
+# print(nums_lst)
+# print(nums_tuple)
