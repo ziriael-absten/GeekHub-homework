@@ -1,26 +1,25 @@
 # Write a script to get the maximum and minimum value in a dictionary.
-values_dict = {"first": 1, "second": 2, "fruit" : "banana", "letter" : "m", "lst" : ["m", "n", "l"]}
-max_value = values_dict["first"]
-min_value = values_dict["first"]
-min_res = values_dict["first"]
-max_res = values_dict["first"]
+values_dict = {"first": 1, "second": 2, "fruit" : "banana", "letter" : "m", "lst" : ["m", "n", "l"], 
+"names" : ["Anna", "Kate"], "data": {"name" : "Peter", "age" : 16}, "prices": {"banana" : 67,
+"milk" : 52, "eggs": 32}, "random_tuple" : ("book", "door"), "random_tulpe2" : ("shelf", "window")}
+nums_lst = []
+str_lst = []
+lst_lst = []
+dict_lst = []
+tuple_lst = []
 for value in values_dict.values():
-    if isinstance(value, int):
-        if max_res < value:
-            max_res = value
-            max_value = value
-        if min_value > value:
-            min_res = value
-            min_value = value
-    else:
-        total = 0
-        for i in value:
-            total += ord(i)
-        if total > max_res:
-            max_res = total
-            max_value = value
-        if min_value > total:
-            min_res = total
-            min_value = value
-# print(max_value)
-# print(min_value)
+    if isinstance(value, int) or isinstance(value, float):
+        nums_lst.append(value)
+    elif isinstance(value, str):
+        str_lst.append(value)
+    elif isinstance(value, list):
+        lst_lst.append(value)
+    elif isinstance(value, tuple):
+        tuple_lst.append(value)
+    elif isinstance(value, dict):
+        dict_lst.append(list(value.items()))
+print(f"The largest value of numbers is {(max(nums_lst))} and the smallest {min(nums_lst)}")
+print(f"The largest value of strings is {(max(str_lst))} and the smallest {min(str_lst)}")
+print(f"The largest value of dictionaries is {max(dict_lst)} and the smallest {min(dict_lst)}")
+print(F"The largest value of tuples is {(max(tuple_lst))} and the smallest {min(tuple_lst)}")
+print(f"The largest value of lists is {(max(lst_lst))} and the smallest {min(lst_lst)}")
