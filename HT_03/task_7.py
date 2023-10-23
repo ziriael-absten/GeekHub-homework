@@ -2,7 +2,8 @@
 # in range <number> where key is <number> and value is <number>*<number>
 #     e.g. 3 --> {0: 0, 1: 1, 2: 4, 3: 9}
 num = int(input("Enter a number: "))
-dict = {}
+nums_dict = {}
 for i in range(0, num + 1):
-    dict[i] = i * i
-# print(dict)
+    nums_dict[i] = i * i
+# print(nums_dict)
+
