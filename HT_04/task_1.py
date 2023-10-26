@@ -4,6 +4,7 @@
 #  етапі навчання для цього використати цикл while)
 # Виводить результат ділення першого на друге. Якщо при цьому виникає помилка - оброблює її 
 # і виводить відповідне повідомлення
+
 while True:
     first_num = input("Enter first num: ")
     second_num = input("Enter second num: ")
@@ -23,5 +24,3 @@ while True:
     except Exception as error:
         print(f"Error : {error}")
         break
-
-
