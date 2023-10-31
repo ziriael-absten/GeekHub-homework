@@ -14,5 +14,10 @@ def season(month_num):
     else:
         return("Value is not correct")
 
-print(season(7))
-    
+month = input("Enter a number of month: ")
+try:
+    month = int(month)
+except ValueError:
+    print("Invalid values")
+else:
+    print(season(month))

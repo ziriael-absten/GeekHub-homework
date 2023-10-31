@@ -5,6 +5,8 @@
 # викликати одну (четверту) функцiю, а вона в своєму тiлi - ще 3.
 
 import random
+
+
 def random_num():
     return random.randint(1, 100)
 

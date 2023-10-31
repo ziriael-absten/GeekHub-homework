@@ -17,6 +17,18 @@ def compare(x, y):
         z = y - x
         return f"{y} is greater than {x} by {z}"
 
-x = int(input("Enter a first number: "))
-y = int(input("Enter a second number: "))
-print(compare(x, y))
+x = input("Enter a first number: ")
+y = input("Enter a second number: ")
+try:
+    x = int(x)
+    y = int(y)
+except ValueError:
+    try:
+        x = float(x)
+        y = float(y)
+    except ValueError:
+        print("Invalid values")
+    else:
+        print(compare(x, y))
+else:
+    print(compare(x, y))
