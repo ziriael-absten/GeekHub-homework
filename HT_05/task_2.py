@@ -16,7 +16,7 @@ def hundred(num):
 def subtraction(first, second):
     return first - second
 
-def sum():
+def do_sum():
     return random_num() + hundred(68) + subtraction(20, 30)
 
-print(sum())
+print(do_sum())
