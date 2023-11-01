@@ -10,15 +10,11 @@ def fibonacci(num):
         a = b
         b = temporary
 
-num = int(input("Enter a number: "))
+
+num = input("Enter an integer number: ")
 try:
     num = int(num)
 except ValueError:
-    try:
-        num = float(num)
-    except ValueError:
-        print("Invalid value")
-    else:
-        fibonacci(num)
+    print("Invalid value")
 else:
     fibonacci(num)

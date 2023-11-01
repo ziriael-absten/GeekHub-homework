@@ -5,11 +5,12 @@
 # по замовчуванню <10> (10%). Функція повинна принтануть суму, яка буде на рахунку, а 
 # також її повернути (але округлену до копійок).
 
-def bank(a, years, percents = 10):
+def bank(a, years, percents=10):
     for i in range(years):
         a += (a * percents / 100)
     rounded_amount = round(a, 2)
     print(f"The amount after {years} years: {rounded_amount} units")
     return rounded_amount
+
 
 # print(bank(2, 5))

@@ -19,15 +19,11 @@ def is_prime(number):
             return False
     return True
 
+
 num = input("Enter a number from 1 to 1000: ")
 try:
     num = int(num)
 except ValueError:
-    try:
-        num = float(num)
-    except ValueError:
-        print("Invalid value")
-    else:
-        print(is_prime(num))
+    print("Invalid value")
 else:
     print(is_prime(num))

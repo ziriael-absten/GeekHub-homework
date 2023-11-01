@@ -12,4 +12,5 @@ def change_lst(lst, shift):
     result = start + end
     return result
 
+
 print(change_lst([1, 2, 3, 4, 5], -2))

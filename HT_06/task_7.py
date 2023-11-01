@@ -16,4 +16,5 @@ def counter(lst):
     for key, value in count_dict.items():
         print(f"{key} -> {value}")
 
+
 counter([1, 1, 'foo', [1, 2], True, 'foo', 1, [1, 2]])

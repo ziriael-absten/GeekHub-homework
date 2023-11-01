@@ -12,6 +12,7 @@ def square(num):
 
     return perimeter, area, diagonal
 
+
 num = input("Enter the length of the square's side: ")
 try:
     num = int(num)
@@ -20,8 +21,6 @@ except ValueError:
         num = float(num)
     except ValueError:
         print("Invalid values")
-    else:
-        print(square(num))
-else:
+if isinstance(num, (int, float)):
     print(square(num))
     

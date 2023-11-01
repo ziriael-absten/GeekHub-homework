@@ -27,18 +27,13 @@ def prime_list(start, end):
 
     return result
 
+
 start = input("Enter initial value: ")
 end = input("Enter the last value: ")
 try:
     start = int(start)
     end = int(end)
 except ValueError:
-    try:
-        start = int(start)
-        end = int(end)
-    except ValueError:
-        print("Invalid value")
-    else:
-        print(prime_list(start, end))
+    print("Invalid value")
 else:
     print(prime_list(start, end))
