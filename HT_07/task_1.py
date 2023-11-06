@@ -14,10 +14,11 @@ class LoginException(Exception):
 
 
 def login(name, password, silent=False):
-    users = {'Anna': '12345', 'Kate': '54321', 'Peter': 'apple123', 'Tom': 'hfvdbrf',
-     'Mark': '51531fejb'}
-    for key, value in users.items():
-        if key == name and value == password:
+    users = [{'name': 'Anna', 'password': '12345'}, {'name': 'Kate', 'password': '54321'},
+     {'name': 'Peter', 'password': 'apple123'}, {'name': 'Tom', 'password': 'hfvdbrf'}, 
+     {'name': 'Mark', 'password': '51531fejb'}]
+    for user in users:
+        if name == user["name"] and password == user["password"]:
             return True
     if silent:
         return False
