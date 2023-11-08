@@ -13,7 +13,10 @@
 #    P.P.P.S Не забудьте обробляти невалідні ситуації (аналог range(1, -10, 5)). 
 # Подивіться як веде себе стандартний range в таких випадках.
 
-def my_range(start, stop, step=1):
+def my_range(start, stop=0, step=1):
+    if stop == 0 and step == 1:
+        stop = start
+        start = 0
     if step == 0:
         raise ValueError("Step cannot be zero")
     if (step > 0 and start >= stop) or (step < 0 and start <= stop):
@@ -24,5 +27,5 @@ def my_range(start, stop, step=1):
         current += step
 
 
-for i in my_range(1, 10, 2):
-        print(i)
+for i in my_range(10):
+    print(i)
