@@ -1,7 +1,14 @@
 [
-  { "name": "Anna", "amount": 32.0 },
-  { "name": "Anna", "amount": 63.0 },
-  { "name": "Anna", "amount": 63.0 },
-  { "name": "Anna", "amount": 56.0 },
-  { "name": "Anna", "amount": 85.0 }
+  {
+    "name": "Anna",
+    "operation": "deposit",
+    "amount": 78.0,
+    "balance": 1337.08
+  },
+  {
+    "name": "Anna",
+    "operation": "withdraw",
+    "amount": 56.0,
+    "balance": 1281.08
+  }
 ]

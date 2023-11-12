@@ -33,7 +33,7 @@ import json
 
 
 def view_balance(name):
-    with open(f"HT_09/{name}_balance.txt") as user_file:
+    with open(f"{name}_balance.txt") as user_file:
         content = user_file.read()
         print()
         print(f"{content} UAH on your balance")
@@ -41,40 +41,71 @@ def view_balance(name):
 
 
 def deposit(name):
-    with open(f"HT_09/{name}_balance.txt", "r+") as user_file:
+    with open(f"{name}_balance.txt", "r+") as user_file:
         content = user_file.read()
         user_file.seek(0)
         amount = float(input("Enter a sum you want to deposit: "))
         if isinstance(amount, (int, float)):
             total = round(float(content) + amount, 2)
-            new_transaction = {"name": name, "amount": amount}
+            new_transaction = {"name": name, "operation": "deposit", "amount": amount, "balance" : total}
             user_file.write(str(total))
-            with open(f"HT_09/{name}_transactions.json", 'r+') as json_file:
-                temp_lst = json.load(json_file)
-                temp_lst.append(new_transaction)
+            with open(f"{name}_transactions.json", 'r+') as json_file:
+                transactions = json.load(json_file)
+                transactions.append(new_transaction)
                 json_file.seek(0)
-                json.dump(temp_lst, json_file)
+                json.dump(transactions, json_file)
 
-def start():
+
+def withdraw(name):
+    with open(f"{name}_balance.txt", "r+") as user_file:
+        content = user_file.read()
+        user_file.seek(0)
+        amount = float(input("Enter a sum you want to withdraw: "))
+        if isinstance(amount, (int, float)) and amount <= float(content):
+            result = round(float(content) - amount, 2)
+            new_transaction = {"name": name, "operation": "withdraw", "amount": amount, "balance" : result}
+            user_file.write(str(result))
+            with open(f"{name}_transactions.json", 'r+') as json_file:
+                transactions = json.load(json_file)
+                transactions.append(new_transaction)
+                json_file.seek(0)
+                json.dump(transactions, json_file)
+
+
+def start(name):
     while True:
         print("To view the balance 1\n"+
         "To deposit 2\n"+
         "To withdraw 3\n"+
         "Exit 4\n")
-        command = int(input("Enter your command please: "))
+        try:
+            command = int(input("Enter your command please: "))
+        except ValueError:
+            print("Command must be a number")
+            continue
         if command == 1:
             view_balance(name)
         if command == 2:
             deposit(name)
+        if command == 3:
+            withdraw(name)
+        if command == 4:
+            break
+        else:
+            print("Your command is not correct")
 
 
+def login():
+    name = input("Enter your name: ")
+    password = input("Enter your password: ")
+    with open("users.CSV") as login_file:
+        csv_reader = csv.reader(login_file)
+        for row in csv_reader:
+            if row[0] == name and row[1] == password:
+                start(name)
+                return
+        print("User not found")
 
-# name = input("Enter your name: ")
-# password = input("Enter your password: ")
-name = "Anna"
-password = "12345"
-with open("HT_09/users.CSV") as login_file:
-    csv_reader = csv.reader(login_file)
-    for row in csv_reader:
-        if row[0] == name and row[1] == password:
-            start()
+
+if __name__ == "__main__":
+    login()
