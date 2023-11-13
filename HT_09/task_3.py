@@ -64,6 +64,9 @@ def withdraw(name):
         content = user_file.read()
         user_file.seek(0)
         amount = float(input("Enter a sum you want to withdraw: "))
+        if amount < 0:
+            print("Amount should be more then 0")
+            return
         if isinstance(amount, (int, float)) and amount <= float(content):
             result = round(float(content) - amount, 2)
             new_transaction = {"name": name, "operation": "withdraw", "amount": amount, "balance" : result}

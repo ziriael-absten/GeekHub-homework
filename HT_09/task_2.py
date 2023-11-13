@@ -7,6 +7,7 @@
 # забудьте додати перевірку чи файл існує.
 
 import os
+import math
 
 
 def text_blocks(f, num):
@@ -24,8 +25,8 @@ def text_blocks(f, num):
         start = content[0:num]
         end = content[-num:]
         middle_len = len(content) // 2
-        middle  = content[middle_len - num // 2:middle_len + num // 2]
+        middle  = content[middle_len - num // 2:middle_len + math.ceil(num / 2)]
         return [start, middle, end]
 
 
-print(text_blocks("HT_09/example1.txt", 2))
+print(text_blocks("HT_09/example1.txt", 3))
