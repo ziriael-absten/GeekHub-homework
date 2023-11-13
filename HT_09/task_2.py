@@ -24,11 +24,8 @@ def text_blocks(f, num):
         start = content[0:num]
         end = content[-num:]
         middle_len = len(content) // 2
-        if len(content) % 2 == 0:
-            middle  = content[middle_len - num // 2:middle_len + num // 2]
-        else:
-            middle  = content[middle_len - num // 2:middle_len + num // 2 + 1]
+        middle  = content[middle_len - num // 2:middle_len + num // 2]
         return [start, middle, end]
 
 
-print(text_blocks("HT_09/example1.txt", 22))
+print(text_blocks("HT_09/example1.txt", 2))

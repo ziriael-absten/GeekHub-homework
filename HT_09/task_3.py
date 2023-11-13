@@ -45,6 +45,9 @@ def deposit(name):
         content = user_file.read()
         user_file.seek(0)
         amount = float(input("Enter a sum you want to deposit: "))
+        if amount < 0:
+            print("Deposit should be more then 0")
+            return
         if isinstance(amount, (int, float)):
             total = round(float(content) + amount, 2)
             new_transaction = {"name": name, "operation": "deposit", "amount": amount, "balance" : total}
@@ -85,11 +88,11 @@ def start(name):
             continue
         if command == 1:
             view_balance(name)
-        if command == 2:
+        elif command == 2:
             deposit(name)
-        if command == 3:
+        elif command == 3:
             withdraw(name)
-        if command == 4:
+        elif command == 4:
             break
         else:
             print("Your command is not correct")

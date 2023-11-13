@@ -10,5 +10,12 @@
     "operation": "withdraw",
     "amount": 56.0,
     "balance": 1281.08
-  }
+  },
+  {
+    "name": "Anna",
+    "operation": "deposit",
+    "amount": 35.0,
+    "balance": 1316.08
+  },
+  { "name": "Anna", "operation": "deposit", "amount": 68.0, "balance": 1384.08 }
 ]
