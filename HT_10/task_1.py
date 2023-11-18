@@ -109,11 +109,29 @@ def register(username, password):
     print("Registration successful")
 
 
-def view_balance(username):
-    pass
+def view_balance(user_id):
+    cur.execute("""
+    SELECT balance 
+    FROM users WHERE id = ?""", (user_id, ))
+    user_data = cur.fetchone()
+    if not user_data:
+        print("User not found")
+    print(f"Your balance is {user_data[0]} UAH")
 
-def deposit():
-    pass
+def deposit(user_id):
+    try:
+        amount = read_num()
+    except ValueError:
+        print("Enter a number please")
+        return
+    except NegativeValueError:
+        print("Your number should be bigger than 0")
+        return
+    cur.execute("""UPDATE users 
+                   SET balance = balance + ? 
+                   WHERE id = ?""", (amount, user_id))
+    con.commit()
+
 
 def withdraw():
     pass
@@ -125,7 +143,7 @@ def read_num():
     return num
 
 
-def user_menu(username):
+def user_menu(user_id):
     while True:
         print("To view the balance 1")
         print("To deposit enter 2")
@@ -133,15 +151,9 @@ def user_menu(username):
         print("Exit 4")
         command = input("Enter your operation: ")
         if command == "1":
-            view_balance(username)
+            view_balance(user_id)
         elif command == "2":
-            try:
-                amount = read_num()
-                deposit(username, amount)
-            except ValueError:
-                print("Enter a number please")
-            except NegativeValueError:
-                print("Your number should be bigger than 0")
+            deposit(user_id)
         elif command == "3":
             try:
                 amount = read_num()
@@ -159,6 +171,10 @@ def user_menu(username):
 def start():
     create_tables()
     insert_tables()
+    deposit(1)
+    view_balance(1)
+    
+    return
     while True:
         print("Login 1\n"+
         "Register 2\n"+
