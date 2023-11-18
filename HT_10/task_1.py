@@ -29,6 +29,10 @@ class NegativeValueError(Exception):
     def __init__(self, value):
         self.value = value
 
+class LoginError(Exception):
+    def __init__(self, value):
+        self.value = value
+
 
 con = sqlite3.connect('atm.db')
 cur = con.cursor()
@@ -77,16 +81,32 @@ def insert_tables():
     atm(id, tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands) 
     VALUES (1, 20, 20, 20, 20, 20, 20, 20)
     """)
+    con.commit()
 
 def incasator_menu():
-    pass
+    print("hello incasator")
 
 
-def login():
-    pass
+def login(username, login_password):
+    cur.execute("""
+    SELECT id, username, password, is_incasator 
+    FROM users WHERE username = ?""", (username, ))
+    user_data = cur.fetchone()
+    if not user_data:
+        raise LoginError("User not found")
+    user_id, username, password, is_incasator = user_data
+    if login_password != password:
+        raise LoginError("Password incorrect")
+    return user_id, is_incasator
 
-def register():
-    pass
+
+def register(username, password):
+    cur.execute("""
+    INSERT OR IGNORE INTO users(username, password, is_incasator) VALUES 
+        (?, ?, FALSE)
+    """, (username, password))
+    con.commit()
+    print("Registration successful")
 
 
 def view_balance(username):
@@ -139,7 +159,6 @@ def user_menu(username):
 def start():
     create_tables()
     insert_tables()
-    return
     while True:
         print("Login 1\n"+
         "Register 2\n"+
@@ -148,14 +167,14 @@ def start():
         if command == "1":
             username = input("Enter your name: ")
             password = input("Enter your password: ")
-            success, is_incasator = login(username, password)
-            if not success:
-                print("Your data is not correct")
-                continue
-            if is_incasator:
-                incasator_menu()
-            else:
-                user_menu()
+            try:
+                user_id, is_incasator = login(username, password)  
+                if is_incasator:
+                    incasator_menu()
+                else:
+                    user_menu()
+            except LoginError as e:
+                print(e)
         elif command == "2":
             username = input("Enter your name: ")
             password = input("Enter your password: ")
