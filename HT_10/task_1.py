@@ -50,7 +50,7 @@ def create_tables():
     cur.execute("""CREATE TABLE IF NOT EXISTS transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
-        type TEXT NOT NULL, 
+        action TEXT NOT NULL, 
         amount INTEGER NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users(id)
     )""")
@@ -82,6 +82,22 @@ def insert_tables():
     VALUES (1, 20, 20, 20, 20, 20, 20, 20)
     """)
     con.commit()
+
+def add_transaction(user_id, action, amount):
+    cur.execute("""
+    INSERT INTO transactions(user_id, action, amount) VALUES 
+        (?, ?, ?)
+    """, (user_id, action, amount))
+
+def show_transactions(user_id):
+    cur.execute("""
+    SELECT action, amount 
+    FROM transactions WHERE user_id = ?""", (user_id, ))
+    transactions = cur.fetchall()
+    for t in transactions:
+        action, amount = t
+        print(f"{action} : {amount} UAH")
+    
 
 def incasator_menu():
     print("hello incasator")
@@ -127,6 +143,7 @@ def deposit(user_id):
     except NegativeValueError:
         print("Your number should be bigger than 0")
         return
+    add_transaction(user_id, "deposit", amount)
     cur.execute("""UPDATE users 
                    SET balance = balance + ? 
                    WHERE id = ?""", (amount, user_id))
@@ -173,7 +190,7 @@ def start():
     insert_tables()
     deposit(1)
     view_balance(1)
-    
+    show_transactions(1)
     return
     while True:
         print("Login 1\n"+
