@@ -134,25 +134,28 @@ def calc_atm_balance(tens, twenties, fifties, hundreds, two_hundreds, five_hundr
     two_hundreds * 200 + five_hundreds * 500 + thousands * 1000
 
 
+nominal_names = {"10": "tens", "20": "twenties", "50": "fifties", "100": "hundreds",
+ "200": "two_hundreds", "500": "five_hundreds", "1000": "thousands"}
+
+ 
 def add_banknotes():
-    print("Please enter positive numbers to add banknotes and negative to remove them")
-    tens = read_num("Enter number of tens: ")
-    twenties = read_num("Enter number of twenties: ")
-    fifties = read_num("Enter number of fifties: ")
-    hundreds = read_num("Enter number of hundreds: ")
-    two_hundreds = read_num("Enter number of two hundreds: ")
-    five_hundreds = read_num("Enter number of five hundreds: ")
-    thousands = read_num("Enter number of thousands: ")
-    cur.execute("""
-    UPDATE atm SET 
-    tens = tens + ?, 
-    twenties = twenties + ?, 
-    fifties = fifties + ?, 
-    hundreds = hundreds + ?, 
-    two_hundreds = two_hundreds + ?, 
-    five_hundreds = five_hundreds + ?, 
-    thousands = thousands + ?
-    """, (tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands))
+    while True:
+        nominal = input("Choose a nominal 10/20/50/100/200/500/1000 or type 'exit'\n")
+        if nominal == "exit":
+            break
+        if nominal not in nominal_names:
+            print(f"Invalid nominal: {nominal}")
+            continue
+        try:
+            amount = read_positive_num(f"Enter a number of {nominal} ")
+        except ValueError:
+            print("Please enter a valid number")
+            continue
+        except NegativeValueError:
+            print("Please enter a not negative number")
+            continue
+        nominal_name = nominal_names[nominal]
+        cur.execute(f"UPDATE atm SET {nominal_name} = ?", (amount,))
     con.commit()
 
 
@@ -160,17 +163,14 @@ def incasator_menu():
     while True:
         print("--------------")
         print("To view the atm balance enter 1")
-        print("To add banknotes enter 2")
+        print("To set banknotes enter 2")
         print("Exit 3")
         print("--------------")
         command = input("Enter your operation: ")
         if command == "1":
             atm_balance()
         elif command == "2":
-            try:
-                add_banknotes()
-            except ValueError:
-                print("Incorrect value, please enter integer number")
+            add_banknotes()
         elif command == "3":
             break
         else:
@@ -178,14 +178,22 @@ def incasator_menu():
 
 
 def validate_registration(name, password):
-    if len(name) < 3 or len(name) > 50:
+    if len(name) < 2: 
+        print("Your name should be longer than 2 letters")
+        return False
+    if len(name) > 50:
+        print("Your name should be shorter than 50 letters")
         return False
     num_in_password = False
     for i in password:
         if i.isdigit():
             num_in_password = True
             break
-    if len(password) < 8 or num_in_password == False:
+    if len(password) < 8:
+        print("Your password should be longer than 8 symbols")
+        return False
+    if num_in_password == False:
+        print("Your password should contain at least one digit")
         return False
     return True
 
@@ -337,12 +345,12 @@ def start():
             except LoginError as e:
                 print(e)
         elif command == "2":
+            print("Your username length should be longer than 2 letters and shorter than 50 letters")
+            print("and your password should have more than 8 symbols and have to contain at least 1 digit")
             username = input("Enter your name: ")
             password = input("Enter your password: ")
             if validate_registration(username, password):
                 register(username, password)
-            else:
-                print("Your data is not correct")
         elif command == "3":
             break
         else:
