@@ -25,11 +25,18 @@
 
 import sqlite3
 
+
 class NegativeValueError(Exception):
     def __init__(self, value):
         self.value = value
 
+
 class LoginError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+
+class UserNotFoundError(Exception):
     def __init__(self, value):
         self.value = value
 
@@ -67,6 +74,7 @@ def create_tables():
     )""")
     con.commit()
 
+
 def insert_tables():
     cur.execute("""
     INSERT OR IGNORE INTO users(username, password, is_incasator) VALUES 
@@ -83,11 +91,13 @@ def insert_tables():
     """)
     con.commit()
 
+
 def add_transaction(user_id, action, amount):
     cur.execute("""
     INSERT INTO transactions(user_id, action, amount) VALUES 
         (?, ?, ?)
     """, (user_id, action, amount))
+
 
 def show_transactions(user_id):
     cur.execute("""
@@ -98,12 +108,9 @@ def show_transactions(user_id):
         action, amount = t
         print(f"{action} : {amount} UAH")
 
+
 def atm_balance():
-    cur.execute("""
-    SELECT tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands 
-    FROM atm WHERE id = 1""")
-    banknotes = cur.fetchone()
-    tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands = banknotes
+    tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands = get_atm_banknotes()
     print(f"10: {tens}")
     print(f"20: {twenties}")
     print(f"50: {fifties}")
@@ -111,7 +118,21 @@ def atm_balance():
     print(f"200: {two_hundreds}")
     print(f"500: {five_hundreds}")
     print(f"1000: {thousands}")
-    
+    total = calc_atm_balance(tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands)
+    print(f"Total balance: {total}")
+
+
+def get_atm_banknotes():
+    cur.execute("""
+    SELECT tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands 
+    FROM atm WHERE id = 1""")
+    return cur.fetchone()
+
+
+def calc_atm_balance(tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands):
+    return tens * 10 + twenties * 20 + fifties * 50 + hundreds * 100 + \
+    two_hundreds * 200 + five_hundreds * 500 + thousands * 1000
+
 
 def add_banknotes():
     print("Please enter positive numbers to add banknotes and negative to remove them")
@@ -137,9 +158,11 @@ def add_banknotes():
 
 def incasator_menu():
     while True:
+        print("--------------")
         print("To view the atm balance enter 1")
         print("To add banknotes enter 2")
         print("Exit 3")
+        print("--------------")
         command = input("Enter your operation: ")
         if command == "1":
             atm_balance()
@@ -153,6 +176,18 @@ def incasator_menu():
         else:
             print("Your command is not correct")
 
+
+def validate_registration(name, password):
+    if len(name) < 3 or len(name) > 50:
+        return False
+    num_in_password = False
+    for i in password:
+        if i.isdigit():
+            num_in_password = True
+            break
+    if len(password) < 8 or num_in_password == False:
+        return False
+    return True
 
 
 def login(username, login_password):
@@ -178,13 +213,19 @@ def register(username, password):
 
 
 def view_balance(user_id):
+    balance = get_balance(user_id)
+    print(f"Your balance is {balance} UAH")
+
+
+def get_balance(user_id):
     cur.execute("""
     SELECT balance 
     FROM users WHERE id = ?""", (user_id, ))
     user_data = cur.fetchone()
     if not user_data:
-        print("User not found")
-    print(f"Your balance is {user_data[0]} UAH")
+        raise UserNotFoundError("User not found")
+    return user_data[0]
+
 
 def deposit(user_id):
     try:
@@ -197,17 +238,49 @@ def deposit(user_id):
         return
     change = requested_amount % 10 
     amount = requested_amount - change
-    add_transaction(user_id, "deposit", amount)
-    cur.execute("""UPDATE users 
-                   SET balance = balance + ? 
-                   WHERE id = ?""", (amount, user_id))
-    con.commit()
+    change_user_balance(user_id, amount, False)
     if change > 0:
         print(f"Your change is {change} UAH")
 
 
-def withdraw():
-    pass
+def withdraw(user_id):
+    try:
+        amount = read_positive_num("Enter amount divisible by 10: ")
+    except ValueError:
+        print("Enter a number please")
+        return
+    except NegativeValueError:
+        print("Your number should be bigger than 0")
+        return
+    if amount % 10 > 0:
+        print("Not divisible by 10")
+        return
+    try:
+        balance = get_balance(user_id)
+    except UserNotFoundError as e:
+        print(e)
+        return
+    if balance < amount:
+        print("Your balance is less than requested amount")
+        return
+    tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands = get_atm_banknotes()
+    total = calc_atm_balance(tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands)
+    if total < amount:
+        print("ATM balance is less than requested amount")
+        return
+    change_user_balance(user_id, amount, True)
+
+
+def change_user_balance(user_id, amount, is_withdrawal):
+    action = "deposit"
+    if is_withdrawal:
+        action = "withdraw"
+        amount *= -1
+    add_transaction(user_id, action, amount)
+    cur.execute("""UPDATE users 
+                   SET balance = balance + ? 
+                   WHERE id = ?""", (amount, user_id))
+    con.commit()
 
 
 def read_positive_num(msg):
@@ -219,26 +292,23 @@ def read_positive_num(msg):
 
 def read_num(msg):
     return int(input(msg))
-    
+
+
 def user_menu(user_id):
     while True:
+        print("--------------")
         print("To view the balance 1")
         print("To deposit enter 2")
         print("To withdraw enter 3")
         print("Exit 4")
+        print("--------------")
         command = input("Enter your operation: ")
         if command == "1":
             view_balance(user_id)
         elif command == "2":
             deposit(user_id)
         elif command == "3":
-            try:
-                amount = read_positive_num("Enter amount: ")
-                withdraw(username, amount)
-            except ValueError:
-                print("Enter a number please")
-            except NegativeValueError:
-                print("Your number should be bigger than 0")
+            withdraw(user_id)
         elif command == "4":
             break
         else:
@@ -249,9 +319,11 @@ def start():
     create_tables()
     insert_tables()
     while True:
+        print("--------------")
         print("Login 1\n"+
         "Register 2\n"+
         "Exit 3")
+        print("--------------")
         command = input("Enter your command: ")
         if command == "1":
             username = input("Enter your name: ")
@@ -261,14 +333,16 @@ def start():
                 if is_incasator:
                     incasator_menu()
                 else:
-                    user_menu()
+                    user_menu(user_id)
             except LoginError as e:
                 print(e)
         elif command == "2":
             username = input("Enter your name: ")
             password = input("Enter your password: ")
-            # функція перевірки валідностіі
-            register(username, password)
+            if validate_registration(username, password):
+                register(username, password)
+            else:
+                print("Your data is not correct")
         elif command == "3":
             break
         else:
