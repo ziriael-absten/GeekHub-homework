@@ -6,6 +6,61 @@ import sqlite3
 import random
 
 
+class DataBase:
+    def __init__(self, db_file):
+        self.con = sqlite3.connect(db_file)
+        self.cur = self.con.cursor()
+
+
+    def create_tables(self):
+        self.cur.execute("""CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            balance INTEGER NOT NULL DEFAULT 0,
+            is_incasator BOOLEAN NOT NULL
+        )""")
+
+        self.cur.execute("""CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            action TEXT NOT NULL, 
+            amount INTEGER NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )""")
+
+        self.cur.execute("""CREATE TABLE IF NOT EXISTS atm (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tens INTEGER NOT NULL DEFAULT 0,
+            twenties INTEGER NOT NULL DEFAULT 0,
+            fifties INTEGER NOT NULL DEFAULT 0,
+            hundreds INTEGER NOT NULL DEFAULT 0,
+            two_hundreds INTEGER NOT NULL DEFAULT 0,
+            five_hundreds INTEGER NOT NULL DEFAULT 0,
+            thousands INTEGER NOT NULL DEFAULT 0
+        )""")
+        self.con.commit()
+
+
+    def insert_tables(self):
+        self.cur.execute("""
+            INSERT OR IGNORE INTO users(username, password, is_incasator) VALUES 
+                ('Bob', '12345', FALSE),
+                ('Alice', 'password', FALSE),
+                ('Alex', '54321', FALSE),
+                ('admin', 'admin', TRUE)
+            """)
+
+        self.cur.execute("""
+            INSERT OR IGNORE INTO 
+            atm(id, tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands) 
+            VALUES (1, 20, 20, 20, 20, 20, 20, 20)
+            """)
+        self.con.commit()
+
+
+db = DataBase("atm.db")
+
 class ATM:
     def __init__(self, tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands):
         self.tens = tens
@@ -51,8 +106,8 @@ class ATM:
                 print("Please enter a not negative number")
                 continue
             nominal_name = nominal_names[nominal]
-            cur.execute(f"UPDATE atm SET {nominal_name} = ?", (amount,))
-        con.commit()
+            db.cur.execute(f"UPDATE atm SET {nominal_name} = ?", (amount,))
+        db.con.commit()
 
 
 class User():
@@ -138,17 +193,17 @@ class User():
             action = "withdraw"
             amount *= -1
         add_transaction(self.user_id, action, amount)
-        cur.execute("""UPDATE users 
+        db.cur.execute("""UPDATE users 
                     SET balance = balance + ? 
                     WHERE id = ?""", (amount, self.user_id))
-        con.commit()
+        db.con.commit()
 
 
     def get_balance(self):
-        cur.execute("""
+        db.cur.execute("""
         SELECT balance 
         FROM users WHERE id = ?""", (self.user_id, ))
-        user_data = cur.fetchone()
+        user_data = db.cur.fetchone()
         if not user_data:
             raise UserNotFoundError("User not found")
         return user_data[0]
@@ -169,79 +224,29 @@ class UserNotFoundError(Exception):
         self.value = value
 
 
-con = sqlite3.connect('atm.db')
-cur = con.cursor()
-
-
-def create_tables():
-    cur.execute("""CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL,
-        balance INTEGER NOT NULL DEFAULT 0,
-        is_incasator BOOLEAN NOT NULL
-    )""")
-
-    cur.execute("""CREATE TABLE IF NOT EXISTS transactions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        action TEXT NOT NULL, 
-        amount INTEGER NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users(id)
-    )""")
-
-    cur.execute("""CREATE TABLE IF NOT EXISTS atm (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        tens INTEGER NOT NULL DEFAULT 0,
-        twenties INTEGER NOT NULL DEFAULT 0,
-        fifties INTEGER NOT NULL DEFAULT 0,
-        hundreds INTEGER NOT NULL DEFAULT 0,
-        two_hundreds INTEGER NOT NULL DEFAULT 0,
-        five_hundreds INTEGER NOT NULL DEFAULT 0,
-        thousands INTEGER NOT NULL DEFAULT 0
-    )""")
-    con.commit()
-
-
-def insert_tables():
-    cur.execute("""
-    INSERT OR IGNORE INTO users(username, password, is_incasator) VALUES 
-        ('Bob', '12345', FALSE),
-        ('Alice', 'password', FALSE),
-        ('Alex', '54321', FALSE),
-        ('admin', 'admin', TRUE)
-    """)
-
-    cur.execute("""
-    INSERT OR IGNORE INTO 
-    atm(id, tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands) 
-    VALUES (1, 20, 20, 20, 20, 20, 20, 20)
-    """)
-    con.commit()
-
 
 def add_transaction(user_id, action, amount):
-    cur.execute("""
+    db.cur.execute("""
     INSERT INTO transactions(user_id, action, amount) VALUES 
         (?, ?, ?)
     """, (user_id, action, amount))
 
 
 def show_transactions(user_id):
-    cur.execute("""
+    db.cur.execute("""
     SELECT action, amount 
     FROM transactions WHERE user_id = ?""", (user_id, ))
-    transactions = cur.fetchall()
+    transactions = db.cur.fetchall()
     for t in transactions:
         action, amount = t
         print(f"{action} : {amount} UAH")
     
 
 def get_atm():
-    cur.execute("""
+    db.cur.execute("""
     SELECT tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands 
     FROM atm WHERE id = 1""")
-    tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands = cur.fetchone()
+    tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands = db.cur.fetchone()
     atm = ATM(tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands)
     return atm
     
@@ -291,10 +296,10 @@ def validate_registration(name, password):
 
 
 def login(username, login_password):
-    cur.execute("""
+    db.cur.execute("""
     SELECT id, username, password, balance, is_incasator 
     FROM users WHERE username = ?""", (username, ))
-    user_data = cur.fetchone()
+    user_data = db.cur.fetchone()
     if not user_data:
         raise LoginError("User not found")
     user_id, username, password, balance, is_incasator = user_data
@@ -305,11 +310,11 @@ def login(username, login_password):
 
 
 def register(username, password, bonus):
-    cur.execute("""
+    db.cur.execute("""
     INSERT OR IGNORE INTO users(username, password, is_incasator, balance) VALUES 
         (?, ?, FALSE, ?)
     """, (username, password, bonus))
-    con.commit()
+    db.con.commit()
     print("Registration successful")
     if bonus > 0:
         print(f"Congratulations, you won bonus {bonus} UAH")
@@ -327,8 +332,8 @@ def read_num(msg):
 
 
 def start():
-    create_tables()
-    insert_tables()
+    db.create_tables()
+    db.insert_tables()
     atm = get_atm()
     while True:
         print("--------------")

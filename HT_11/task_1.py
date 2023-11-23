@@ -27,7 +27,7 @@ class Calc:
         self.new_result = None
 
 
-    def summa(self, first, second):
+    def addition(self, first, second):
         """
         Perform addition operation.
         Parameters:
@@ -38,7 +38,7 @@ class Calc:
         """
         self.last_result = self.new_result
         self.new_result = first + second
-        return self.last_result
+        return self.new_result
 
 
     def subtraction(self, first, second):
@@ -52,7 +52,7 @@ class Calc:
         """
         self.last_result = self.new_result
         self.new_result = first - second
-        return self.last_result
+        return self.new_result
 
 
     def multiplication(self, first, second):
@@ -66,7 +66,7 @@ class Calc:
         """
         self.last_result = self.new_result
         self.new_result = first * second
-        return self.last_result
+        return self.new_result
 
 
     def division(self, first, second):
@@ -80,7 +80,7 @@ class Calc:
         """
         self.last_result = self.new_result
         self.new_result = first / second
-        return self.last_result
+        return self.new_result
 
 
     def __str__(self) -> str:
@@ -92,11 +92,11 @@ class Calc:
         return str(self.last_result)
 
 
-last_result = Calc()
-print(last_result)
-last_result.summa(1, 1)
-print(last_result)
-last_result.multiplication(2, 3)
-print(last_result)
-last_result.multiplication(4, 3)
-print(last_result)
+calculator = Calc()
+print(calculator)
+calculator.addition(1, 1)
+print(calculator)
+calculator.multiplication(2, 3)
+print(calculator)
+calculator.multiplication(4, 3)
+print(calculator)

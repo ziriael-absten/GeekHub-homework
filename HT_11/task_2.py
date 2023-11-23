@@ -8,7 +8,6 @@ class Person:
     def __init__(self, name, age):
         self.name = name
         self.age = age
-        self.profession = None
 
 
     def show_age(self):
@@ -20,7 +19,7 @@ class Person:
 
 
     def show_all_information(self):
-        print(f"Name: {self.name}, Age: {self.age}, Profession: {self.profession}")
+        print(f"Name: {self.name}, Age: {self.age}")
 
 
 person1 = Person("Alice", 25)
@@ -29,3 +28,5 @@ person1.profession = "Engineer"
 person2.profession = "Teacher"
 person1.show_all_information()
 person2.show_all_information()
+print(person1.profession)
+print(person2.profession)
