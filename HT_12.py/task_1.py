@@ -1,5 +1,7 @@
-# 3. Банкомат 2.0: переробіть программу з функціонального підходу програмування на використання 
-# класів. Додайте шанс 10% отримати бонус на баланс при створенні нового користувача.
+# HT #12
+# Банкомат 3.0
+# - реалізуйте видачу купюр за логікою видавання найменшої кількості купюр. 
+# Наприклад: 2560 --> 2х1000, 1х500, 3х20. Будьте обережні з "жадібним алгоритмом"!
 
 
 import sqlite3
@@ -64,30 +66,84 @@ db = DataBase("atm.db")
 
 class ATM:
     def __init__(self, tens, twenties, fifties, hundreds, two_hundreds, five_hundreds, thousands):
-        self.tens = tens
-        self.twenties = twenties
-        self.fifties = fifties
-        self.hundreds = hundreds
-        self.two_hundreds = two_hundreds
-        self.five_hundreds = five_hundreds
-        self.thousands = thousands
+        self.denominations = [1000, 500, 200, 100, 50, 20, 10]
+        self.bills = {
+            1000: thousands, 
+            500: five_hundreds, 
+            200: two_hundreds, 
+            100: hundreds, 
+            50: fifties, 
+            20: twenties, 
+            10: tens}
+
+
+    def withdraw_bills(self, amount):
+        combinations = self.generate_limited_combinations(amount, self.denominations, self.bills)
+        best = self.calc_best_combination(combinations)
+        if best is None:
+            print("No bills")
+            return False
+        for denomination, count in best.items():
+            self.bills[denomination] -= count
+        self.save_atm()
+        for denomination, count in best.items():
+            print(f"{denomination} x {count}")
+        return True
+
+
+    def generate_limited_combinations(self, amount, denominations, limits, current_combination=None):
+        if current_combination is None:
+            current_combination = []
+        if amount == 0:
+            return [current_combination]
+
+        combinations = []
+        for i, denom in enumerate(denominations):
+            if amount >= denom and limits[denom] > 0:
+                remaining_denominations = denominations[i:]
+                new_limits = limits.copy()
+                new_limits[denom] -= 1
+                combinations += self.generate_limited_combinations(amount - denom, remaining_denominations, new_limits, current_combination + [denom])
+
+        return combinations
+
+
+    def calc_best_combination(self, all_combinations):
+        if len(all_combinations) == 0:
+            return None
+        best = all_combinations[0]
+        for combination in all_combinations:
+            if len(combination) < len(best):
+                best = combination
+        return {note: best.count(note) for note in set(best)}
+
+
+    def format_combination(self, combination):
+        return [f"{combination.count(denom)} x {denom}" for denom in set(combination)]
 
 
     def print_balance(self):
-        print(f"10: {self.tens}")
-        print(f"20: {self.twenties}")
-        print(f"50: {self.fifties}")
-        print(f"100: {self.hundreds}")
-        print(f"200: {self.two_hundreds}")
-        print(f"500: {self.five_hundreds}")
-        print(f"1000: {self.thousands}")
+        for denomination, count in self.bills.items():
+            print(f"{denomination}: {count}")
         total = self.calc_balance()
         print(f"Total balance: {total}")
 
 
     def calc_balance(self):
-        return self.tens * 10 + self.twenties * 20 + self.fifties * 50 + self.hundreds * 100 + \
-        self.two_hundreds * 200 + self.five_hundreds * 500 + self.thousands * 1000
+        return sum([denom * count for denom, count in self.bills.items()])
+
+
+    def save_atm(self):
+        db.cur.execute(f"""UPDATE atm SET
+            thousands = ?,
+            five_hundreds = ?,
+            two_hundreds = ?,
+            hundreds = ?,
+            fifties = ?,
+            twenties = ?,
+            tens = ?""", (self.bills[1000], self.bills[500], self.bills[200], self.bills[100], self.bills[50],
+            self.bills[20], self.bills[10]))
+        db.con.commit()
 
 
     def add_banknotes(self):
@@ -185,7 +241,9 @@ class User():
         if atm_balance < amount:
             print("ATM balance is less than requested amount")
             return
-        self.change_balance(amount, True)
+        success = atm.withdraw_bills(amount)
+        if success:
+            self.change_balance(amount, True)
 
 
     def change_balance(self, amount, is_withdrawal):
@@ -371,3 +429,4 @@ def start():
 
 if __name__ == "__main__":
     start()
+
