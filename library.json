@@ -1,0 +1,34 @@
+{
+  "shelves": [
+    {
+      "books": [
+        {
+          "title": "Harry Potter",
+          "author": "J.K. Rowling",
+          "category": "Fiction",
+          "is_borrowed": false,
+          "borrower": null
+        },
+        {
+          "title": "The Catcher in the Rye",
+          "author": "J.D. Salinger",
+          "category": "Fiction",
+          "is_borrowed": false,
+          "borrower": null
+        }
+      ]
+    },
+    {
+      "books": [
+        {
+          "title": "Python Programming",
+          "author": "John Smith",
+          "category": "Programming",
+          "is_borrowed": false,
+          "borrower": null
+        }
+      ]
+    }
+  ],
+  "persons": [{ "name": "Kate", "borrowed_books": [] }]
+}
