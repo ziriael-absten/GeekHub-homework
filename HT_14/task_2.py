@@ -9,29 +9,44 @@ import requests
 from datetime import datetime, timedelta
 
 
+class StatusCodeException(Exception):
+    def __init__(self, value):
+        self.value = value
+
+
 def get_exchange_rate_on_date(date, currency_code):
     url = f"https://api.privatbank.ua/p24api/exchange_rates?json&date={date}"
     try:
         response = requests.get(url)
+        if response.status_code != 200:
+            raise StatusCodeException(response.status_code)
         data = response.json()
         for rate in data['exchangeRate']:
             if rate['currency'] == currency_code:
                 return rate['purchaseRateNB'], rate['saleRateNB']
         return None, None
+    except requests.exceptions.ConnectionError as e:
+        print(f"Connection error: {e}")
+        return None, None
     except requests.exceptions.RequestException as e:
         print(f"Error: {e}")
         return None, None
+    
 
 
 def get_currency_exchange_rate_for_period(start_date, end_date, currency_code):
     current_date = start_date
     while current_date <= end_date:
-        buy_rate, sale_rate = get_exchange_rate_on_date(current_date.strftime("%d.%m.%Y"), currency_code)
-        if buy_rate is not None and sale_rate is not None:
-            print(f"Currency {currency_code} for {current_date.strftime('%d.%m.%Y')}: Buy - {buy_rate}, Sale - {sale_rate}")
-        else:
-            print(f"There is no data for {currency_code} for {current_date.strftime('%d.%m.%Y')}")
-        current_date += timedelta(days=1)
+        try:
+            buy_rate, sale_rate = get_exchange_rate_on_date(current_date.strftime("%d.%m.%Y"), currency_code)
+            if buy_rate is not None and sale_rate is not None:
+                print(f"Currency {currency_code} for {current_date.strftime('%d.%m.%Y')}: Buy - {buy_rate}, Sale - {sale_rate}")
+            else:
+                print(f"There is no data for {currency_code} for {current_date.strftime('%d.%m.%Y')}")
+            current_date += timedelta(days=1)
+        except StatusCodeException as e:
+            print(f"Unexpected status code: {e}")
+            break
 
 
 def start():

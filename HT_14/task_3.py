@@ -9,22 +9,32 @@ import csv
 
 
 def scrape_quotes(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, "html.parser")
-    quotes = []
-    for quote in soup.find_all("div", class_="quote"):
-        text = quote.find("span", class_="text").text
-        author = quote.find("small", class_="author").text
-        author_info_url = quote.find("a")["href"]
-        author_info = scrape_author_info(f"http://quotes.toscrape.com{author_info_url}")
-        tags = [tag.text for tag in quote.find_all("a", class_="tag")]
-        quotes.append({
-            "text": text,
-            "author": author,
-            "author_info": author_info,
-            "tags": ", ".join(tags)
-        })
-    return quotes
+    try:
+        response = requests.get(url)
+        if response.status_code != 200:
+                print(f"Unexpected status code: {response.status_code}")
+                return None
+        soup = BeautifulSoup(response.text, "html.parser")
+        quotes = []
+        for quote in soup.find_all("div", class_="quote"):
+            text = quote.find("span", class_="text").text
+            author = quote.find("small", class_="author").text
+            author_info_url = quote.find("a")["href"]
+            author_info = scrape_author_info(f"http://quotes.toscrape.com{author_info_url}")
+            tags = [tag.text for tag in quote.find_all("a", class_="tag")]
+            quotes.append({
+                "text": text,
+                "author": author,
+                "author_info": author_info,
+                "tags": ", ".join(tags)
+            })
+        return quotes
+    except requests.exceptions.ConnectionError as e:
+        print(f"Connection error: {e}")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+        return None
 
 
 def scrape_author_info(url):

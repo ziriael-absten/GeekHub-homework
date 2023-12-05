@@ -389,11 +389,18 @@ def read_num(msg):
 
 def check_rates():
         url = "https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5"
-        response = requests.get(url)
-        data = response.json()
-        print("Exchange Rates: ")
-        for currency in data:
-            print(f"{currency['ccy']}: {currency['buy']} / {currency['sale']}")
+        try:
+            response = requests.get(url)
+            if response.status_code != 200:
+                print(f"Unexpected status code: {response.status_code}")
+            data = response.json()
+            print("Exchange Rates: ")
+            for currency in data:
+                print(f"{currency['ccy']}: {currency['buy']} / {currency['sale']}")
+        except requests.exceptions.ConnectionError as e:
+            print(f"Connection error: {e}")
+        except requests.exceptions.RequestException as e:
+            print(f"Error: {e}")
 
 
 def start():
