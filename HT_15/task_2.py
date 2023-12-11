@@ -28,10 +28,10 @@ def write_to_csv(data):
 
 
 def start():
-    result = []
     start_url = "https://www.expireddomains.net"
     url = "https://www.expireddomains.net/expired-domains/"
     while True:
+        result = []
         page = get_data(url)
         soup = BeautifulSoup(page, features="html.parser")
         listing_div = soup.find('div', {'id': 'listing'})
@@ -51,7 +51,7 @@ def start():
             break
         url = start_url + next_link['href']
         time.sleep(10)
-    write_to_csv(result)
+        write_to_csv(result)
 
 
 if __name__ == "__main__":

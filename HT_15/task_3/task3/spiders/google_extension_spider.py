@@ -10,16 +10,13 @@ class GoogleExtensionSpider(scrapy.Spider):
     name = 'google_extension'
     start_urls = ['https://chrome.google.com/webstore/sitemap']
 
-
     def parse(self, response):
         # Extracting links from <loc> tags in the sitemap
         ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
         sitemaps = response.xpath('//ns:sitemap', namespaces=ns)
-
         for sitemap in sitemaps:
             loc = sitemap.xpath('./ns:loc/text()', namespaces=ns).get()
             yield scrapy.Request(url=loc, callback=self.parse_extensions_page)
-
 
     def parse_extensions_page(self, response):
         ns = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
@@ -28,10 +25,10 @@ class GoogleExtensionSpider(scrapy.Spider):
             loc = url.xpath('./ns:loc/text()', namespaces=ns).get()
             yield scrapy.Request(url=loc, callback=self.parse_extension_details)
 
-
     def parse_extension_details(self, response):
         strings = response.url.split('/')
-        extension_id = strings[-1]
+        end = strings[-1]
+        extension_id = end.split("?")[0]
         extension_name = response.css('meta[property="og:title"]::attr(content)').get()
         short_description = response.css('meta[property="og:description"]::attr(content)').get()
         print(f"extension_id: {extension_id}")
